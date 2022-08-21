@@ -27,3 +27,19 @@ function displayProductInfos(product) {
     console.log(product_color[i])
   }
 }
+
+// Récuperer la value de quantité quand elle change
+const select_quantity = document.querySelector('#quantity');
+select_quantity.addEventListener('change', (event) => {
+  let result = event.target.value;
+  result = parseInt(result) ;
+  console.log(result)
+});
+
+/* if(result < 1){
+    console.log('pas assez de produit');
+  }else if(result > 100){
+    console.log('Trop de produit')
+  }else{
+    console.log(result)
+  } */
