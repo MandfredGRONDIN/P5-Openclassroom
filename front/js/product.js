@@ -59,25 +59,47 @@ function getQuantity() {
 
 // Click sur le bouton ajouter au panier
 const add_cart = document.querySelector("#addToCart");
-add_cart.addEventListener("click", (event) => {
-  let result = getQuantity();
-  let result_color = color;
+add_cart.addEventListener("click", () => {
   let product_client = {
     id: product_id,
     quantity: quantite,
     color: color,
   };
+  console.log(product_client);
   verifyInput(product_client);
 });
 //------------------------------------------------------------
 
 // Vérifier si il y as bien une couleur et une quantite de choisi
-function verifyInput() {
-  if (color == []) {
+function verifyInput(product_client) {
+  if (color == "") {
     alert("Merci de choisir une couleur");
   } else if (quantite > 0 && quantite < 101) {
-    console.log("c'est bon");
+    console.log("c'est bon", product_client);
+    window.confirm(`Votre commande de ${quantite} canapé ${color} est ajoutée au panier. Pour consulter votre panier, cliquez sur OK`);
+    addLs(product_client);
+    window.location.assign("cart.html");
   } else {
-    alert("Veuillez choisir un nombre de produit compris entre 1 et 100");
+    alert("Veuillez choisir une quantité de produit compris entre 1 et 100");
+  }
+}
+//------------------------------------------------------------
+
+// Ajouter le produit au ls et ajoute uniquement la quantité si le produit y est déjà
+function addLs(product_client) {
+  let basket = JSON.parse(localStorage.getItem("product_client")); /* JSON.parse permet d'analyser ls.getItem comme du json */
+  if (basket == null) {
+    basket = [];
+    basket.push(product_client);
+    localStorage.setItem("product_client", JSON.stringify(basket));
+  } else {
+    let get_article = basket.find((product_client) => product_id == product_client.id && color == product_client.color);
+    if (get_article) {
+      get_article.quantity = Number(product_client.quantity) + Number(get_article.quantity);
+      localStorage.setItem("product_client", JSON.stringify(basket));
+    } else {
+      basket.push(product_client);
+      localStorage.setItem("product_client", JSON.stringify(basket));
+    }
   }
 }
