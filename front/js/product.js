@@ -9,17 +9,29 @@ fetch(`http://localhost:3000/api/products/` + product_id)
     getQuantity();
   });
 
-let product_client = {};
-product_client.id = product_id;
+let product_client = { 
+  id : product_id,
+  color : "",
+  quantity : 0
+};
 
-let color = "";
-let quantite = 0;
 let product_img = document.querySelector(".item__img");
 let product_title = document.querySelector("#title");
 let product_price = document.querySelector("#price");
 let product_description = document.querySelector("#description");
 let product_colors = document.querySelector("#colors");
-let product_nb = document.querySelector("itemQuantity");
+let product_nb = document.querySelector("#quantity");
+let color_miss = document.querySelector(".item__content");
+
+// Test delete
+
+let newElt = document.createElement("span");
+let elt = color_miss;
+elt.appendChild(newElt);
+newElt.classList.add("color__miss");
+newElt.classList.add("quantity__miss");
+newElt.classList.add("product__added");
+newElt.classList.add("excess__quantity");
 
 // Afficher les informations du produit
 function displayProductInfos(product) {
@@ -36,23 +48,19 @@ function displayProductInfos(product) {
 
 // Récuperer la valeur de couleur quand celle ci-change
 function getColor() {
-  const colors = document.querySelector("#colors");
-  colors.addEventListener("input", (event) => {
+  product_colors.addEventListener("change", (event) => {
     let result_color = event.target.value;
-    product_client.colors = result_color;
-    color = result_color;
+    product_client.color = result_color;
   });
 }
 //------------------------------------------------------------
 
 // Récuperer la value de quantité quand elle change
 function getQuantity() {
-  const qte = document.querySelector("#quantity");
-  qte.addEventListener("change", (event) => {
+  product_nb.addEventListener("change", (event) => {
     let result = event.target.value;
     result = parseInt(result);
-    product_client.quantity = result;
-    quantite = result;
+    product_client.quantity = result
   });
 }
 //------------------------------------------------------------
@@ -60,11 +68,6 @@ function getQuantity() {
 // Click sur le bouton ajouter au panier
 const add_cart = document.querySelector("#addToCart");
 add_cart.addEventListener("click", () => {
-  let product_client = {
-    id: product_id,
-    quantity: quantite,
-    color: color,
-  };
   console.log(product_client);
   verifyInput(product_client);
 });
@@ -72,34 +75,74 @@ add_cart.addEventListener("click", () => {
 
 // Vérifier si il y as bien une couleur et une quantite de choisi
 function verifyInput(product_client) {
-  if (color == "") {
-    alert("Merci de choisir une couleur");
-  } else if (quantite > 0 && quantite < 101) {
-    console.log("c'est bon", product_client);
-    window.confirm(`Votre commande de ${quantite} canapé ${color} est ajoutée au panier. Pour consulter votre panier, cliquez sur OK`);
-    addLs(product_client);
-    window.location.assign("cart.html");
+  if (product_client.color == "") {
+    colorMiss()
+  } else if (product_client.quantity < 1 || product_client.quantity > 101){
+    quantityMiss();
   } else {
-    alert("Veuillez choisir une quantité de produit compris entre 1 et 100");
+      if (addLs(product_client)){
+      console.log("c'est bon", product_client);
+      window.confirm(`Votre commande de ${product_client.quantity} canapé ${product_client.color} est ajoutée au panier. Pour consulter votre panier, cliquez sur OK`);
+      productAdded()
+    } else {
+      excessQuantity()
+    }
   }
 }
 //------------------------------------------------------------
 
 // Ajouter le produit au ls et ajoute uniquement la quantité si le produit y est déjà
 function addLs(product_client) {
-  let basket = JSON.parse(localStorage.getItem("product_client")); /* JSON.parse permet d'analyser ls.getItem comme du json */
-  if (basket == null) {
-    basket = [];
-    basket.push(product_client);
-    localStorage.setItem("product_client", JSON.stringify(basket));
+  let cart = JSON.parse(localStorage.getItem("product_client")); /* JSON.parse permet d'analyser ls.getItem comme du json */
+  if (cart == null) {
+    cart = [];
+    cart.push(product_client);
+    localStorage.setItem("product_client", JSON.stringify(cart));
   } else {
-    let get_article = basket.find((product_client) => product_id == product_client.id && color == product_client.color);
+    let get_article = cart.find((cart_product) => product_client.id == cart_product.id && product_client.color == cart_product.color);
     if (get_article) {
-      get_article.quantity = Number(product_client.quantity) + Number(get_article.quantity);
-      localStorage.setItem("product_client", JSON.stringify(basket));
+      let nb = Number(product_client.quantity) + Number(get_article.quantity);
+      if (nb < 101){
+      get_article.quantity = nb;
+      localStorage.setItem("product_client", JSON.stringify(cart));
+      } else {
+        return false
+      }
     } else {
-      basket.push(product_client);
-      localStorage.setItem("product_client", JSON.stringify(basket));
+      cart.push(product_client);
+      localStorage.setItem("product_client", JSON.stringify(cart));
     }
-  }
+  } return true
+} 
+//------------------------------------------------------------
+
+// Fonction pour les messages d'erreurs
+function colorMiss(){
+  document.querySelector(".color__miss").textContent = "Merci de bien choisir une couleur";
+  newElt.style.color = "red";
+  newElt.style.fontWeight = "bold";
+  newElt.style.textAlign = "center";
+  newElt.style.paddingTop = "5px";
 }
+
+function quantityMiss(){
+  document.querySelector(".quantity__miss").textContent = "Veuillez choisir une quantité de produit compris entre 1 et 100";
+  newElt.style.color = "red";
+  newElt.style.fontWeight = "bold";
+  newElt.style.textAlign = "center";
+}
+
+function productAdded(){
+  document.querySelector(".product__added").textContent = `Votre commande viens d'etre ajoutée au panier`;
+  newElt.style.color = "green";
+  newElt.style.fontWeight = "bold";
+  newElt.style.textAlign = "center";
+}
+
+function excessQuantity(){
+  document.querySelector(".excess__quantity").textContent = "La quantité total d'un même article ne peux dépasser 100";
+  newElt.style.color = "red";
+  newElt.style.fontWeight = "bold";
+  newElt.style.textAlign = "center";
+}
+//------------------------------------------------------------
