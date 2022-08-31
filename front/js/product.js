@@ -23,8 +23,8 @@ let product_colors = document.querySelector("#colors");
 let product_nb = document.querySelector("#quantity");
 let color_miss = document.querySelector(".item__content");
 
-// Test delete
 
+// Test delete
 let newElt = document.createElement("span");
 let elt = color_miss;
 elt.appendChild(newElt);
@@ -82,7 +82,6 @@ function verifyInput(product_client) {
   } else {
       if (addLs(product_client)){
       console.log("c'est bon", product_client);
-      window.confirm(`Votre commande de ${product_client.quantity} canapé ${product_client.color} est ajoutée au panier. Pour consulter votre panier, cliquez sur OK`);
       productAdded()
     } else {
       excessQuantity()
