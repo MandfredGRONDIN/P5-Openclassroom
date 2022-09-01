@@ -8,7 +8,8 @@ async function getAPIProducts(product_client) {
   if (cart === null || cart == 0) {
     document.querySelector("#totalQuantity").innerHTML = "0";
     document.querySelector("#totalPrice").innerHTML = "0";
-    document.querySelector("h1").innerHTML = "Vous n'avez pas d'article dans votre panier";
+    document.querySelector("h1").innerHTML =
+      "Vous n'avez pas d'article dans votre panier";
   } else {
     try {
       for (let i = 0; i < product_client.length; i++) {
@@ -20,15 +21,14 @@ async function getAPIProducts(product_client) {
           productData.quantity = cart[i].quantity;
         }
         createProduct(productData);
-        deleteProduct();
         changeInput();
+        deleteProduct();
+        /* totalQty(); */
       }
     } catch (err) {
       console.error(err);
     }
   }
-  
-  
 }
 //------------------------------------------------------------
 
@@ -51,7 +51,7 @@ function createProduct(productData) {
               <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${productData.quantity}">
             </div>
             <div class="cart__item__content__settings__delete">
-              <p class="deleteItem">Supprimer</p>
+              <p class="deleteItem" >Supprimer</p>
             </div>
           </div>
         </div>
@@ -61,33 +61,72 @@ function createProduct(productData) {
 
 // Récuperer la value de quantité quand elle change
 function changeInput() {
-  let input_qty = document.querySelectorAll(".itemQuantity");
+  input_qty = document.querySelectorAll(".itemQuantity");
   input_qty.forEach(function (qte) {
     qte.addEventListener("change", (e) => {
       let result_qty = e.target.value;
       result_qty = parseInt(result_qty);
-      cart.quantity = result_qty;
+      productData.quantity = result_qty;
       console.log(result_qty);
+      localStorage.setItem("product_client", JSON.stringify(cart));
     });
   });
 }
 //------------------------------------------------------------
 
 // Supprimer le produit
- function deleteProduct(){
-  let delete_item = document.getElementsByClassName("cart__item");
-  console.log(delete_item)
-  const test = delete_item.closest('deleteItem');
-  console.log(test)
-  delete_item.forEach(function (del){
-    del.addEventListener("click", (e) => {
-      console.log(delete_item.dataset.id)
-      console.log(productData._id)
-      /* const articleSelectId = this.getAttribute('data-id'); */
-      /* console.log(articleSelectId) */
-    })
-  })
-} 
+function deleteProduct() {
+  let btn_supprimer = document.querySelectorAll(".cart__item .deleteItem");
+  for (let i = 0; i < btn_supprimer.length; i++) {
+    btn_supprimer[i].addEventListener("click", (e) => {
+      product_del = btn_supprimer[i].closest("article");
+      data_id = product_del.getAttribute("data-id");
+      data_color = product_del.getAttribute("data-color");
+      for (let j = 0; j < cart.length; j++) {
+        if (data_id == cart[j].id && data_color == cart[j].color) {
+          cart.splice(j);
+          localStorage.removeItem(cart);
+          localStorage.setItem("product_client", JSON.stringify(cart));
+          window.location.href = "cart.html"
+        }
+      }
+    });
+  }
+}
+//------------------------------------------------------------
 
-  
+// Total Quantité
+/* function totalQty(){
+  let total_article = 0;
+  let total_price = 0;
+  let cart_el = document.querySelector(".cart__item");
+  cart_el.forEach((cart) => {
+    total_article += JSON.parse(cart.dataset.quantity);
+    total_price += cart.dataset.quantity * cart.dataset.price;
+  });
+  document.getElementById("totalQuantity").textContent = totalArticle;  
+  document.getElementById("totalPrice").textContent = totalPrix;
+} */
 
+/* function totalQty(){
+  let total_article = 0;
+  let total_price = 0;
+  let cart_el = document.querySelector(".cart__item");
+  for(j = 0; j < cart.length; j++){
+    cart[j].quantity += total_article
+    console.log(cart[j].quantity)
+    console.log(total_article)
+}
+} */
+
+
+/* function totalQty(){
+  let qty_total = document.querySelectorAll(".cart__item .cart__item__content__description");
+  for(i =0; i < qty_total.length; i++){
+    console.log(qty_total[i])
+    let prixTotalCalcul = [];
+    let prix_produit_cart = productData.price;
+    prixTotalCalcul.push(prix_produit_cart)
+    console.log(prixTotalCalcul)
+}}
+  */
