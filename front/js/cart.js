@@ -1,31 +1,30 @@
 let cart = JSON.parse(localStorage.getItem("product_client"));
+let apiProducts = [];
 
 getAPIProducts(cart);
 //------------------------------------------------------------
 
 // Récupérer les infos manquantes des produits
-async function getAPIProducts(product_client) {
-  if (cart === null || cart == 0) {
+async function getAPIProducts(products) {
+  if (products === null || products == 0) {
     document.querySelector("#totalQuantity").innerHTML = "0";
     document.querySelector("#totalPrice").innerHTML = "0";
     document.querySelector("h1").innerHTML =
       "Vous n'avez pas d'article dans votre panier";
   } else {
     try {
-      for (let i = 0; i < product_client.length; i++) {
-        await fetch(`http://localhost:3000/api/products/` + cart[i].id)
+      for (let i = 0; i < products.length; i++) {
+        let apiProduct = null;
+        await fetch(`http://localhost:3000/api/products/` + products[i].id)
           .then((res) => res.json())
-          .then((data) => (productData = data));
-        if (cart[i].id == productData._id) {
-          productData.colors = cart[i].color;
-          productData.quantity = cart[i].quantity;
-        }
-        createProduct(productData);
-        changeInput();
-        deleteProduct();
-        /* totalQty(); */
+          .then((data) => (apiProduct = data));
+        apiProduct.color = products[i].color;
+        apiProduct.quantity = products[i].quantity;
+        apiProducts.push(apiProduct)
       }
-    } catch (err) {
+      displayProducts();  
+      
+  } catch (err) {
       console.error(err);
     }
   }
@@ -33,61 +32,74 @@ async function getAPIProducts(product_client) {
 //------------------------------------------------------------
 
 // Création des produits et leurs infos
-function createProduct(productData) {
+function displayProducts(){
   let cart_items = document.querySelector("#cart__items");
-  cart_items.innerHTML += `<article class="cart__item" data-id="${productData._id}" data-color="${productData.colors}">
-        <div class="cart__item__img">
-          <img src="${productData.imageUrl}" alt="${productData.altTxt}">
+  cart_items.innerHTML = apiProducts.map(product => {
+    return `<article class="cart__item" data-id="${product._id}" data-color="${product.color}">
+    <div class="cart__item__img">
+      <img src="${product.imageUrl}" alt="${product.altTxt}">
+    </div>
+    <div class="cart__item__content">
+      <div class="cart__item__content__description">
+        <h2>${product.name}</h2>
+        <p>${product.color}</p>
+        <p>${product.price} €</p>
+      </div>
+      <div class="cart__item__content__settings">
+        <div class="cart__item__content__settings__quantity">
+          <p>Qté : </p>
+          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantity}">
         </div>
-        <div class="cart__item__content">
-          <div class="cart__item__content__description">
-            <h2>${productData.name}</h2>
-            <p>${productData.colors}</p>
-            <p>${productData.price} €</p>
-          </div>
-          <div class="cart__item__content__settings">
-            <div class="cart__item__content__settings__quantity">
-              <p>Qté : </p>
-              <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${productData.quantity}">
-            </div>
-            <div class="cart__item__content__settings__delete">
-              <p class="deleteItem" >Supprimer</p>
-            </div>
-          </div>
+        <div class="cart__item__content__settings__delete">
+          <p class="deleteItem" >Supprimer</p>
         </div>
-      </article>`;
+      </div>
+    </div>
+  </article>`
+  }).join("");
+  listenDeleteEvents();
+  changeInput();
 }
+
 //------------------------------------------------------------
 
 // Récuperer la value de quantité quand elle change
-function changeInput() {
-  input_qty = document.querySelectorAll(".itemQuantity");
-  input_qty.forEach(function (qte) {
-    qte.addEventListener("change", (e) => {
-      let result_qty = e.target.value;
-      result_qty = parseInt(result_qty);
-      productData.quantity = result_qty;
-      console.log(result_qty);
-      localStorage.setItem("product_client", JSON.stringify(cart));
-    });
-  });
+function changeInput(){
+  let input_qty = document.querySelectorAll(".cart__item");
+  input_qty.forEach((input_qty) => {
+    input_qty.addEventListener("change", (e) => {
+      let cart = JSON.parse(localStorage.getItem("product_client"))
+      let article = input_qty.closest("article");
+      let data_id = article.getAttribute("data-id");
+      let data_color = article.getAttribute("data-color");
+      for (article of cart){
+        if(article.id === data_id && article.color === data_color){
+          article.quantity = e.target.value;
+          article.quantity = parseInt(article.quantity)
+          localStorage.product_client = JSON.stringify(cart);
+          cart.quantity = e.target.value;
+        }
+      }
+    })
+  })
 }
 //------------------------------------------------------------
 
 // Supprimer le produit
-function deleteProduct() {
-  let btn_supprimer = document.querySelectorAll(".cart__item .deleteItem");
-  for (let i = 0; i < btn_supprimer.length; i++) {
-    btn_supprimer[i].addEventListener("click", (e) => {
-      product_del = btn_supprimer[i].closest("article");
-      data_id = product_del.getAttribute("data-id");
-      data_color = product_del.getAttribute("data-color");
-      for (let j = 0; j < cart.length; j++) {
-        if (data_id == cart[j].id && data_color == cart[j].color) {
-          cart.splice(j);
-          localStorage.removeItem(cart);
-          localStorage.setItem("product_client", JSON.stringify(cart));
-          window.location.href = "cart.html"
+function listenDeleteEvents() {
+  let btn_delete = document.querySelectorAll(".cart__item .deleteItem");
+  for (let i = 0; i < btn_delete.length; i++) {
+    btn_delete[i].addEventListener("click", (e) => {
+      let article = btn_delete[i].closest("article");
+      let data_id = article.getAttribute("data-id");
+      let data_color = article.getAttribute("data-color");
+      for (let j = 0; j < apiProducts.length; j++) {
+        if (data_id == apiProducts[j]._id && data_color == apiProducts[j].color) {
+          cart = cart.filter( prod => prod !== cart[j])
+          localStorage.removeItem(cart)
+          localStorage.setItem("product_client", JSON.stringify(cart))
+          article.remove()
+          return null 
         }
       }
     });
@@ -95,38 +107,28 @@ function deleteProduct() {
 }
 //------------------------------------------------------------
 
+// Prix total
+let prixTotalCalcul = [];
+function totalPrice(){
+  let prixProduitsDansLePanier = productData.price * productData.quantity;
+  prixTotalCalcul.push(prixProduitsDansLePanier);
+  const reducer = (accumulator, currentValue) => accumulator + currentValue;
+  const prixTotal = prixTotalCalcul.reduce(reducer);
+  console.log(prixTotal);
+  document.getElementById("totalPrice").textContent = prixTotal;
+} 
+//------------------------------------------------------------
+
 // Total Quantité
-/* function totalQty(){
-  let total_article = 0;
-  let total_price = 0;
-  let cart_el = document.querySelector(".cart__item");
-  cart_el.forEach((cart) => {
-    total_article += JSON.parse(cart.dataset.quantity);
-    total_price += cart.dataset.quantity * cart.dataset.price;
-  });
-  document.getElementById("totalQuantity").textContent = totalArticle;  
-  document.getElementById("totalPrice").textContent = totalPrix;
-} */
-
-/* function totalQty(){
-  let total_article = 0;
-  let total_price = 0;
-  let cart_el = document.querySelector(".cart__item");
-  for(j = 0; j < cart.length; j++){
-    cart[j].quantity += total_article
-    console.log(cart[j].quantity)
-    console.log(total_article)
-}
-} */
-
-
-/* function totalQty(){
-  let qty_total = document.querySelectorAll(".cart__item .cart__item__content__description");
-  for(i =0; i < qty_total.length; i++){
-    console.log(qty_total[i])
-    let prixTotalCalcul = [];
-    let prix_produit_cart = productData.price;
-    prixTotalCalcul.push(prix_produit_cart)
-    console.log(prixTotalCalcul)
+let qtyTotalCalcul = [];
+function totalQty(){
+  for ( let i = 0; i < apiProducts.length; i++){
+  console.log(apiProducts[i].quantity)
+  let qtyProduitsDansLePanier = apiProducts.quantity;
+  console.log(qtyProduitsDansLePanier)
+  qtyTotalCalcul.push(qtyProduitsDansLePanier);
+  const reducer = (accumulator, currentValue) => accumulator + currentValue;
+  const qtyTotal = qtyTotalCalcul.reduce(reducer);
+  console.log(qtyTotal);
+  document.getElementById("totalQuantity").textContent = qtyTotal; 
 }}
-  */
