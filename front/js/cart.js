@@ -133,3 +133,46 @@ function totalQty() {
   totalPrice.innerHTML = total;
   totalQuantity.innerHTML = number;
 }
+//------------------------------------------------------------
+
+// Formulaire
+let first_name = document.querySelector('#firstName');
+let last_name = document.querySelector('#lastName');
+let address = document.querySelector('#address');
+let city = document.querySelector('#city');
+let e_mail = document.querySelector('#email');
+let btn_order = document.querySelector("#order");
+
+let first_name_error = document.querySelector('#firstNameErrorMsg');
+let last_name_error = document.querySelector('#lastNameErrorMsg');
+let address_error = document.querySelector('#addressErrorMsg');
+let city_error = document.querySelector('#cityErrorMsg');
+let e_mail_error = document.querySelector('#emailErrorMsg');
+
+// Récupération des valeurs du formulaires pour les mettres dans le localStorage
+
+btn_order.addEventListener("click", (e) =>{
+  e.preventDefault()
+  /* localStorage.setItem("firstName", first_name.value)
+  localStorage.setItem("lastName", last_name.value)
+  localStorage.setItem("address", address.value)
+  localStorage.setItem("city", city.value)
+  localStorage.setItem("email", e_mail.value) */
+  let formulaire = {
+  firstName : first_name.value,
+  lastName : last_name.value,
+  address : address.value,
+  city : city.value,
+  email : e_mail.value,
+}
+console.log(formulaire)
+
+let a_envoyer = {
+  cart,
+  formulaire
+}
+console.log("a envoyer")
+console.log(a_envoyer)
+})
+
+
