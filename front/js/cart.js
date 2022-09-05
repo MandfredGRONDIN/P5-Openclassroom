@@ -68,7 +68,6 @@ function changeInput() {
   let input_qty = document.querySelectorAll(".cart__item");
   input_qty.forEach((input_qty) => {
     input_qty.addEventListener("change", (e) => {
-      let cart = JSON.parse(localStorage.getItem("product_client"));
       let article = input_qty.closest("article");
       let data_id = article.getAttribute("data-id");
       let data_color = article.getAttribute("data-color");
@@ -76,11 +75,10 @@ function changeInput() {
         if (cart[i].id === data_id && cart[i].color === data_color) {
           cart[i].quantity = e.target.value;
           cart[i].quantity = parseInt(cart[i].quantity);
-          localStorage.setItem("product_client", JSON.stringify(cart));
-          cart = JSON.parse(localStorage.getItem("product_client"))
-          totalQty();
+          localStorage.removeItem(cart)
+          localStorage.setItem("product_client", JSON.stringify(cart))
         }
-      }
+      }totalQty();
     });
   });
 }
@@ -100,6 +98,7 @@ function listenDeleteEvents() {
           localStorage.removeItem(cart)
           localStorage.setItem("product_client", JSON.stringify(cart))
           article.remove()
+          totalQty();
           return null 
         }
       }
@@ -118,6 +117,6 @@ function totalQty(){
     number += cart[j].quantity;
     total += cart[j].quantity * apiProducts[j].price;
 }
-totalPrice.innerHTML = total;
-totalQuantity.innerHTML = number;
+  totalPrice.innerHTML = total;
+  totalQuantity.innerHTML = number;
 }
