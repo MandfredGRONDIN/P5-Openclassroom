@@ -108,7 +108,7 @@ function listenDeleteEvents() {
             document.querySelector("#totalQuantity").innerHTML = "0";
             document.querySelector("#totalPrice").innerHTML = "0";
             document.querySelector("h1").innerHTML =
-              "Vous n'avez pas d'article dans votre panier";
+              "Vous n'avez plus d'article dans votre panier";
           } else {
             totalQty();
             return null;
@@ -135,44 +135,137 @@ function totalQty() {
 }
 //------------------------------------------------------------
 
-// Formulaire
-let first_name = document.querySelector('#firstName');
-let last_name = document.querySelector('#lastName');
-let address = document.querySelector('#address');
-let city = document.querySelector('#city');
-let e_mail = document.querySelector('#email');
+// Gestion du formulaire
+
+// Formulaire querySelector
+let first_name = document.querySelector("#firstName");
+let last_name = document.querySelector("#lastName");
+let address = document.querySelector("#address");
+let city = document.querySelector("#city");
+let e_mail = document.querySelector("#email");
 let btn_order = document.querySelector("#order");
 
-let first_name_error = document.querySelector('#firstNameErrorMsg');
-let last_name_error = document.querySelector('#lastNameErrorMsg');
-let address_error = document.querySelector('#addressErrorMsg');
-let city_error = document.querySelector('#cityErrorMsg');
-let e_mail_error = document.querySelector('#emailErrorMsg');
+// Formulaire Error querySelector
+let first_name_error = document.querySelector("#firstNameErrorMsg");
+first_name_error.style.color = "red";
+let last_name_error = document.querySelector("#lastNameErrorMsg");
+last_name_error.style.color = "red";
+let address_error = document.querySelector("#addressErrorMsg");
+address_error.style.color = "red";
+let city_error = document.querySelector("#cityErrorMsg");
+city_error.style.color = "red";
+let e_mail_error = document.querySelector("#emailErrorMsg");
+e_mail_error.style.color = "red";
 
-// Récupération des valeurs du formulaires pour les mettres dans le localStorage
+// Event au click
+btn_order.addEventListener("click", (e) => {
+  e.preventDefault();
 
-btn_order.addEventListener("click", (e) =>{
-  e.preventDefault()
-  /* localStorage.setItem("firstName", first_name.value)
-  localStorage.setItem("lastName", last_name.value)
-  localStorage.setItem("address", address.value)
-  localStorage.setItem("city", city.value)
-  localStorage.setItem("email", e_mail.value) */
-  let formulaire = {
-  firstName : first_name.value,
-  lastName : last_name.value,
-  address : address.value,
-  city : city.value,
-  email : e_mail.value,
-}
-console.log(formulaire)
+  // Création d'une classe pour fabriquer l'objet dans lequel iront les values du formulaire
+  class Formulaire {
+    constructor() {
+      this.name = first_name.value;
+      this.lastName = last_name.value;
+      this.address = address.value;
+      this.city = city.value;
+      this.email = e_mail.value;
+    }
+  }
+  // Appel de l'instance de classe Formulaire pour créer l'objet formulaire_value
+  const formulaire_value = new Formulaire();
 
-let a_envoyer = {
-  cart,
-  formulaire
-}
-console.log("a envoyer")
-console.log(a_envoyer)
-})
+  // Const regEx pour le formulaire
+  const regExLastnameNameCity = (value) => {
+    return /^[A-Za-z]{3,20}$/.test(value);
+  };
+  const regExCity = (value) => {
+    return /^[a-zA-Zéèàïêç\-\s]{2,30}$/.test(value);
+  };
+  const regExAdress = (value) => {
+    return /^(.){2,50}$/.test(value);
+  };
+  const regExEmail = (value) => {
+    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value);
+  };
 
+  // Controle de la validité name
+  function nameControle() {
+    let nameForm = formulaire_value.name;
+    if (regExLastnameNameCity(nameForm)) {
+      first_name_error.innerHTML = "";
+      return true;
+    } else {
+      first_name_error.innerHTML =
+        "Le prénom doit avoir 3 lettres minimum et pas de caractère spéciaux ou chiffres";
+      return false;
+    }
+  }
+  // Controle de la validité lastName
+  function lastnameControle() {
+    let lastnameForm = formulaire_value.lastName;
+    if (regExLastnameNameCity(lastnameForm)) {
+      last_name_error.innerHTML = "";
+      return true;
+    } else {
+      last_name_error.innerHTML =
+        "Le nom doit avoir 3 lettres minimum et pas de caractère spéciaux ou chiffres";
+      return false;
+    }
+  }
+  // Controle de la validité address
+  function adressControle() {
+    let addressForm = formulaire_value.address;
+    if (regExAdress(addressForm)) {
+      address_error.innerHTML = "";
+      return true;
+    } else {
+      address_error.innerHTML =
+        "merci de rentrer une adresse valide, max 50 caractères";
+      return false;
+    }
+  }
+  // Controle de la validité city
+  function cityControle() {
+    let cityForm = formulaire_value.city;
+    if (regExCity(cityForm)) {
+      city_error.innerHTML = "";
+      return true;
+    } else {
+      city_error.innerHTML =
+        "Merci de rentrer le nom de votre ville ou village, pas de code postal";
+      return false;
+    }
+  }
+  // Controle de la validité email
+  function emailControle() {
+    let emailForm = formulaire_value.email;
+    if (regExEmail(emailForm)) {
+      e_mail_error.innerHTML = "";
+      return true;
+    } else {
+      e_mail_error.innerHTML =
+        "Email non valide, il doit contenir un @ et 1 point suivi de maxixum 3 lettres";
+      return false;
+    }
+  }
 
+  // Vérification si la fonction return vrai ou faux puis rajoute dans le localstorage si vrai
+  if (
+    nameControle() &&
+    lastnameControle() &&
+    adressControle() &&
+    cityControle() &&
+    emailControle()
+  ) {
+    localStorage.setItem("formulaire", JSON.stringify(formulaire_value));
+  }
+  //-------------------------------------------------
+
+  // Récupération des valeurs du formulaires + les produits pour les mettres dans le localStorage
+  let to_send = {
+    cart,
+    formulaire_value,
+  };
+  console.log("a envoyer");
+  console.log(to_send);
+});

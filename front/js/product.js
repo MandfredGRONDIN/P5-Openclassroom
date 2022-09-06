@@ -24,15 +24,6 @@ let product_nb = document.querySelector("#quantity");
 let color_miss = document.querySelector(".item__content");
 
 
-// Test delete
-let newElt = document.createElement("span");
-let elt = color_miss;
-elt.appendChild(newElt);
-newElt.classList.add("color__miss");
-newElt.classList.add("quantity__miss");
-newElt.classList.add("product__added");
-newElt.classList.add("excess__quantity");
-
 // Afficher les informations du produit
 function displayProductInfos(product) {
   product_img.innerHTML += `<img src="${product.imageUrl}" alt="${product.altTxt}">`;
@@ -116,6 +107,14 @@ function addLs(product_client) {
 //------------------------------------------------------------
 
 // Fonction pour les messages d'erreurs
+let newElt = document.createElement("span");
+let elt = color_miss;
+elt.appendChild(newElt);
+newElt.classList.add("color__miss");
+newElt.classList.add("quantity__miss");
+newElt.classList.add("product__added");
+newElt.classList.add("excess__quantity");
+
 function colorMiss(){
   document.querySelector(".color__miss").textContent = "Merci de bien choisir une couleur";
   newElt.style.color = "red";
