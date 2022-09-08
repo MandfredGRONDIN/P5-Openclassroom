@@ -157,6 +157,15 @@ city_error.style.color = "red";
 let e_mail_error = document.querySelector("#emailErrorMsg");
 e_mail_error.style.color = "red";
 
+let contact = {
+  firstName: "",
+  lastName: "",
+  address: "",
+  city: "",
+  email: "",
+};
+let products = [];
+
 // Event au click
 btn_order.addEventListener("click", (e) => {
   e.preventDefault();
@@ -164,7 +173,7 @@ btn_order.addEventListener("click", (e) => {
   // Création d'une classe pour fabriquer l'objet dans lequel iront les values du formulaire
   class Formulaire {
     constructor() {
-      this.name = first_name.value;
+      this.firstName = first_name.value;
       this.lastName = last_name.value;
       this.address = address.value;
       this.city = city.value;
@@ -190,7 +199,7 @@ btn_order.addEventListener("click", (e) => {
 
   // Controle de la validité name
   function nameControle() {
-    let nameForm = formulaire_value.name;
+    let nameForm = formulaire_value.firstName;
     if (regExLastnameNameCity(nameForm)) {
       first_name_error.innerHTML = "";
       return true;
@@ -249,7 +258,7 @@ btn_order.addEventListener("click", (e) => {
     }
   }
 
-  // Vérification si la fonction return vrai ou faux puis rajoute dans le localstorage si vrai
+  // Vérification si la fonction return vrai ou faux puis rajoute dans le localstorage si vrai puis ajout dans le localStorage
   if (
     nameControle() &&
     lastnameControle() &&
@@ -261,11 +270,43 @@ btn_order.addEventListener("click", (e) => {
   }
   //-------------------------------------------------
 
-  // Récupération des valeurs du formulaires + les produits pour les mettres dans le localStorage
-  let to_send = {
-    cart,
-    formulaire_value,
-  };
-  console.log("a envoyer");
-  console.log(to_send);
+  // Récupération des valeurs du formulaires + les produits dans le localStorage pour les mettres dans commandeFinale
+  for (let articleSelect of cart){
+    products.push(articleSelect.id)
+  }
+  let commandeFinale;
+  let contactRef;
+  paquet()
+  function paquet(){
+    contactRef = JSON.parse(localStorage.getItem("formulaire"));
+    commandeFinale = {
+      contact: {
+        firstName: contactRef.firstName,
+        lastName: contactRef.lastName,
+        address: contactRef.address,
+        city: contactRef.city,
+        email: contactRef.email,
+      },
+      products: products,
+    }
+  }
+
+  // Envoie de l'objet order vers le serveur
+  fetch("http://localhost:3000/api/products/order",{
+    method: "POST",
+    headers: { 
+    'Content-Type': 'application/json' 
+    },
+    body: JSON.stringify(commandeFinale),
+  })
+  .then(async(response)=>{
+    try{
+      const contenu = await response.json();
+      console.log(contenu.orderId);
+      let orderId = contenu.orderId;
+      window.location.assign("confirmation.html?id=" + orderId) 
+    }catch(e){
+      console.log(e);
+    }
+  })
 });
