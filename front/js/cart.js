@@ -1,5 +1,5 @@
 let cart = JSON.parse(localStorage.getItem("product_client"));
-let apiProducts = [];
+let api_products = [];
 
 getAPIProducts(cart);
 //------------------------------------------------------------
@@ -11,29 +11,32 @@ async function getAPIProducts(products) {
     document.querySelector("#totalPrice").innerHTML = "0";
     document.querySelector("h1").innerHTML =
       "Vous n'avez pas d'article dans votre panier";
-  } else {
-    try {
-      for (let i = 0; i < products.length; i++) {
-        let apiProduct = null;
-        await fetch(`http://localhost:3000/api/products/` + products[i].id)
-          .then((res) => res.json())
-          .then((data) => (apiProduct = data));
-        apiProduct.color = products[i].color;
-        apiProduct.quantity = products[i].quantity;
-        apiProducts.push(apiProduct);
-      }
-      displayProducts();
-    } catch (err) {
-      console.error(err);
-    }
+    return null;
   }
+  try {
+    for (let i = 0; i < products.length; i++) {
+      let api_product = null;
+      await fetch(`http://localhost:3000/api/products/` + products[i].id)
+        .then((res) => res.json())
+        .then((data) => (api_product = data));
+      if(!api_product){
+        continue;
+      }
+      api_product.color = products[i].color;
+      api_product.quantity = products[i].quantity;
+      api_products.push(api_product);
+    }
+    displayProducts();
+  } catch (err) {
+    console.error(err);
+  } 
 }
 //------------------------------------------------------------
 
 // Création des produits et leurs infos
 function displayProducts() {
   let cart_items = document.querySelector("#cart__items");
-  cart_items.innerHTML = apiProducts
+  cart_items.innerHTML = api_products 
     .map((product) => {
       return `<article class="cart__item" data-id="${product._id}" data-color="${product.color}">
     <div class="cart__item__img">
@@ -95,13 +98,12 @@ function listenDeleteEvents() {
       let article = btn_delete[i].closest("article");
       let data_id = article.getAttribute("data-id");
       let data_color = article.getAttribute("data-color");
-      for (let j = 0; j < apiProducts.length; j++) {
+      for (let j = 0; j < api_products.length; j++) {
         if (
-          data_id == apiProducts[j]._id &&
-          data_color == apiProducts[j].color
+          data_id == api_products[j]._id &&
+          data_color == api_products[j].color
         ) {
-          cart = cart.filter((prod) => prod !== cart[j]);
-          localStorage.removeItem(cart);
+          cart = cart.filter((prod) => prod._id !== api_products[j]._id && prod.color !== api_products[j].color);
           localStorage.setItem("product_client", JSON.stringify(cart));
           article.remove();
           if (cart === null || cart == 0) {
@@ -111,7 +113,7 @@ function listenDeleteEvents() {
               "Vous n'avez plus d'article dans votre panier";
           } else {
             totalQty();
-            return null;
+            break;
           }
         }
       }
@@ -122,20 +124,23 @@ function listenDeleteEvents() {
 
 // Total Quantité
 function totalQty() {
-  let totalQuantity = document.querySelector("#totalQuantity");
-  let totalPrice = document.querySelector("#totalPrice");
+  let total_quantity = document.querySelector("#totalQuantity");
+  let total_price = document.querySelector("#totalPrice");
   let number = 0;
   let total = 0;
   for (let j = 0; j < cart.length; j++) {
+    let current_index = api_products.findIndex(product => {
+      return product._id == cart[j].id
+    })
     number += cart[j].quantity;
-    total += cart[j].quantity * apiProducts[j].price;
+    total += cart[j].quantity * api_products[current_index].price;
   }
-  totalPrice.innerHTML = total;
-  totalQuantity.innerHTML = number;
+  total_price.innerHTML = total;
+  total_quantity.innerHTML = number;
 }
 //------------------------------------------------------------
 
-// Gestion du formulaire
+// Gestion du formulaire et de l'envoie vers la page confirmation
 
 // Formulaire querySelector
 let first_name = document.querySelector("#firstName");
@@ -148,15 +153,20 @@ let btn_order = document.querySelector("#order");
 // Formulaire Error querySelector
 let first_name_error = document.querySelector("#firstNameErrorMsg");
 first_name_error.style.color = "red";
+
 let last_name_error = document.querySelector("#lastNameErrorMsg");
 last_name_error.style.color = "red";
+
 let address_error = document.querySelector("#addressErrorMsg");
 address_error.style.color = "red";
+
 let city_error = document.querySelector("#cityErrorMsg");
 city_error.style.color = "red";
+
 let e_mail_error = document.querySelector("#emailErrorMsg");
 e_mail_error.style.color = "red";
 
+// Champs demanadés pour le POST
 let contact = {
   firstName: "",
   lastName: "",
@@ -164,14 +174,14 @@ let contact = {
   city: "",
   email: "",
 };
-let products = [];
+
 
 // Event au click
 btn_order.addEventListener("click", (e) => {
   e.preventDefault();
 
   // Création d'une classe pour fabriquer l'objet dans lequel iront les values du formulaire
-  class Formulaire {
+  class Form {
     constructor() {
       this.firstName = first_name.value;
       this.lastName = last_name.value;
@@ -181,26 +191,26 @@ btn_order.addEventListener("click", (e) => {
     }
   }
   // Appel de l'instance de classe Formulaire pour créer l'objet formulaire_value
-  const formulaire_value = new Formulaire();
+  const FORM_VALUE = new Form();
 
   // Const regEx pour le formulaire
-  const regExLastnameNameCity = (value) => {
+  const REG_EX_LAST_FIRST_NAME = (value) => {
     return /^[A-Za-z]{3,20}$/.test(value);
   };
-  const regExCity = (value) => {
+  const REG_EX_CITY = (value) => {
     return /^[a-zA-Zéèàïêç\-\s]{2,30}$/.test(value);
   };
-  const regExAdress = (value) => {
-    return /^(.){2,50}$/.test(value);
+  const REG_EX_ADDRESS = (value) => {
+    return /^[0-9]{1,5}\s+[A-Za-zéèàïêç\-\s]{2,50}$/.test(value);
   };
-  const regExEmail = (value) => {
+  const REG_EX_E_MAIL = (value) => {
     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value);
   };
 
   // Controle de la validité name
-  function nameControle() {
-    let nameForm = formulaire_value.firstName;
-    if (regExLastnameNameCity(nameForm)) {
+  function firstNameControle() {
+    let name_form = FORM_VALUE.firstName;
+    if (REG_EX_LAST_FIRST_NAME(name_form)) {
       first_name_error.innerHTML = "";
       return true;
     } else {
@@ -209,10 +219,11 @@ btn_order.addEventListener("click", (e) => {
       return false;
     }
   }
+
   // Controle de la validité lastName
-  function lastnameControle() {
-    let lastnameForm = formulaire_value.lastName;
-    if (regExLastnameNameCity(lastnameForm)) {
+  function lastNameControle() {
+    let last_name_form = FORM_VALUE.lastName;
+    if (REG_EX_LAST_FIRST_NAME(last_name_form)) {
       last_name_error.innerHTML = "";
       return true;
     } else {
@@ -221,10 +232,11 @@ btn_order.addEventListener("click", (e) => {
       return false;
     }
   }
+
   // Controle de la validité address
   function adressControle() {
-    let addressForm = formulaire_value.address;
-    if (regExAdress(addressForm)) {
+    let address_form = FORM_VALUE.address;
+    if (REG_EX_ADDRESS(address_form)) {
       address_error.innerHTML = "";
       return true;
     } else {
@@ -233,10 +245,11 @@ btn_order.addEventListener("click", (e) => {
       return false;
     }
   }
+
   // Controle de la validité city
   function cityControle() {
-    let cityForm = formulaire_value.city;
-    if (regExCity(cityForm)) {
+    let city_form = FORM_VALUE.city;
+    if (REG_EX_CITY(city_form)) {
       city_error.innerHTML = "";
       return true;
     } else {
@@ -245,10 +258,11 @@ btn_order.addEventListener("click", (e) => {
       return false;
     }
   }
+
   // Controle de la validité email
   function emailControle() {
-    let emailForm = formulaire_value.email;
-    if (regExEmail(emailForm)) {
+    let email_form = FORM_VALUE.email;
+    if (REG_EX_E_MAIL(email_form)) {
       e_mail_error.innerHTML = "";
       return true;
     } else {
@@ -258,55 +272,45 @@ btn_order.addEventListener("click", (e) => {
     }
   }
 
-  // Vérification si la fonction return vrai ou faux puis rajoute dans le localstorage si vrai puis ajout dans le localStorage
+  // Vérification si la fonction return vrai ou faux
   if (
-    nameControle() &&
-    lastnameControle() &&
-    adressControle() &&
-    cityControle() &&
-    emailControle()
+    !firstNameControle() ||
+    !lastNameControle() ||
+    !adressControle() ||
+    !cityControle() ||
+    !emailControle()
   ) {
-    localStorage.setItem("formulaire", JSON.stringify(formulaire_value));
+    return null
   }
   //-------------------------------------------------
 
-  // Récupération des valeurs du formulaires + les produits dans le localStorage pour les mettres dans commandeFinale
-  for (let articleSelect of cart){
-    products.push(articleSelect.id)
-  }
-  let commandeFinale;
-  let contactRef;
-  paquet()
-  function paquet(){
-    contactRef = JSON.parse(localStorage.getItem("formulaire"));
-    commandeFinale = {
-      contact: {
-        firstName: contactRef.firstName,
-        lastName: contactRef.lastName,
-        address: contactRef.address,
-        city: contactRef.city,
-        email: contactRef.email,
-      },
-      products: products,
-    }
+  // Push uniquement les Id dans le tableau des produits
+  let products = [];
+  for (let article_select of cart) {
+    products.push(article_select.id);
   }
 
   // Envoie de l'objet order vers le serveur
-  fetch("http://localhost:3000/api/products/order",{
+  fetch("http://localhost:3000/api/products/order", {
     method: "POST",
-    headers: { 
-    'Content-Type': 'application/json' 
+    headers: {
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(commandeFinale),
-  })
-  .then(async(response)=>{
-    try{
-      const contenu = await response.json();
-      console.log(contenu.orderId);
-      let orderId = contenu.orderId;
-      window.location.assign("confirmation.html?id=" + orderId) 
-    }catch(e){
+    body: JSON.stringify({
+      contact: FORM_VALUE,
+      products: products,
+    }),
+  }).then(async (response) => {
+    try {
+      const POST_ORDER = await response.json();
+      let orderId = POST_ORDER.orderId;
+      
+      // Clear le localStorage
+      localStorage.clear();
+
+      window.location.assign("confirmation.html?id=" + orderId);
+    } catch (e) {
       console.log(e);
     }
-  })
+  });
 });

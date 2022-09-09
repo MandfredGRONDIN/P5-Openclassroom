@@ -5,8 +5,8 @@ fetch(`http://localhost:3000/api/products/` + product_id)
   .then((product) => product.json()) // Transforme l'api en fichier json
   .then((product) => {
     displayProductInfos(product);
-    getColor();
-    getQuantity();
+    listenColorsEvent();
+    listenQuantityEvent();
   });
 
 let product_client = { 
@@ -30,34 +30,37 @@ function displayProductInfos(product) {
   product_title.innerHTML += `<h1 id="title"> ${product.name} </h1>`;
   product_price.innerHTML += `<span id="price"> ${product.price} </span>`;
   product_description.innerHTML += `<p id="description"> ${product.description} </p>`;
-  let product_color = product.colors;
-  for (let i = 0; i < product_color.length; i++) {
-    product_colors.innerHTML += `<option value="${product_color[i]}">${product_color[i]}</option>`;
+  for (let i = 0; i < product.colors.length; i++) {
+    product_colors.innerHTML += `<option value="${product.colors[i]}">${product.colors[i]}</option>`;
   }
 }
 //------------------------------------------------------------
 
 // Récuperer la valeur de couleur quand celle ci-change
-function getColor() {
+console.log(product_client.color)
+function listenColorsEvent() {
   product_colors.addEventListener("change", (event) => {
-    let result_color = event.target.value;
-    product_client.color = result_color;
+    product_client.color = event.target.value;
+    if(product_client.color != 0){
+      document.querySelector(".color__miss").textContent = "";
+    }
   });
 }
 //------------------------------------------------------------
 
 // Récuperer la value de quantité quand elle change
-function getQuantity() {
+function listenQuantityEvent() {
   product_nb.addEventListener("change", (event) => {
-    let result = event.target.value;
-    result = parseInt(result);
-    product_client.quantity = result
+    product_client.quantity = parseInt(event.target.value);
+    if(product_client.quantity != 0){
+      document.querySelector(".quantity__miss").textContent = "";
+    }
   });
 }
 //------------------------------------------------------------
 
 // Click sur le bouton ajouter au panier
-const add_cart = document.querySelector("#addToCart");
+let add_cart = document.querySelector("#addToCart");
 add_cart.addEventListener("click", () => {
   console.log(product_client);
   verifyInput(product_client);
@@ -68,11 +71,10 @@ add_cart.addEventListener("click", () => {
 function verifyInput(product_client) {
   if (product_client.color == "") {
     colorMiss()
-  } else if (product_client.quantity < 1 || product_client.quantity > 101){
+  } else if (product_client.quantity < 1 || product_client.quantity > 100){
     quantityMiss();
   } else {
       if (addLs(product_client)){
-      console.log("c'est bon", product_client);
       productAdded()
     } else {
       excessQuantity()
@@ -110,37 +112,38 @@ function addLs(product_client) {
 let newElt = document.createElement("span");
 let elt = color_miss;
 elt.appendChild(newElt);
-newElt.classList.add("color__miss");
-newElt.classList.add("quantity__miss");
-newElt.classList.add("product__added");
-newElt.classList.add("excess__quantity");
+newElt.classList.add("color__miss", "quantity__miss","product__added", "excess__quantity");
 
-function colorMiss(){
-  document.querySelector(".color__miss").textContent = "Merci de bien choisir une couleur";
+function styleError(){
   newElt.style.color = "red";
   newElt.style.fontWeight = "bold";
   newElt.style.textAlign = "center";
   newElt.style.paddingTop = "5px";
 }
+function style(){
+  newElt.style.color = "green";
+  newElt.style.fontWeight = "bold";
+  newElt.style.textAlign = "center";
+  newElt.style.paddingTop = "5px";
+}
+
+function colorMiss(){
+  document.querySelector(".color__miss").textContent = "Merci de bien choisir une couleur";
+  styleError()
+}
 
 function quantityMiss(){
   document.querySelector(".quantity__miss").textContent = "Veuillez choisir une quantité de produit compris entre 1 et 100";
-  newElt.style.color = "red";
-  newElt.style.fontWeight = "bold";
-  newElt.style.textAlign = "center";
+  styleError()
 }
 
 function productAdded(){
   document.querySelector(".product__added").textContent = `Votre commande viens d'etre ajoutée au panier`;
-  newElt.style.color = "green";
-  newElt.style.fontWeight = "bold";
-  newElt.style.textAlign = "center";
+  style()
 }
 
 function excessQuantity(){
   document.querySelector(".excess__quantity").textContent = "La quantité total d'un même article ne peux dépasser 100";
-  newElt.style.color = "red";
-  newElt.style.fontWeight = "bold";
-  newElt.style.textAlign = "center";
+  styleError()
 }
 //------------------------------------------------------------

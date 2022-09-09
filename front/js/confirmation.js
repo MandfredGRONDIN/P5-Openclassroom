@@ -1,9 +1,5 @@
-localStorage.clear(); 
 // récupération id
-let str = window.location.href;
-let url = new URL(str);
-let idOrder = url.searchParams.get("id");
+let orderId = new URLSearchParams(window.location.search).get("id");
 
-
-let orderId = document.getElementById("orderId");
-orderId.textContent = idOrder;
+let id_order = document.getElementById("orderId");
+id_order.textContent = orderId;
