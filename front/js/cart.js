@@ -78,10 +78,15 @@ function changeInput() {
       let data_color = article.getAttribute("data-color");
       for (let i = 0; i < cart.length; i++) {
         if (cart[i].id === data_id && cart[i].color === data_color) {
-          cart[i].quantity = e.target.value;
-          cart[i].quantity = parseInt(cart[i].quantity);
-          localStorage.removeItem(cart);
-          localStorage.setItem("product_client", JSON.stringify(cart));
+          console.log(e.target.value);
+          console.log(cart[i].quantity);
+          if (e.target.value > 0 && e.target.value < 101) {
+            cart[i].quantity = e.target.value;
+            cart[i].quantity = parseInt(cart[i].quantity);
+            localStorage.setItem("product_client", JSON.stringify(cart));
+          } else {
+            return false;
+          }
         }
       }
       totalQty();
@@ -129,7 +134,7 @@ function totalQty() {
   let number = 0;
   let total = 0;
   for (let j = 0; j < cart.length; j++) {
-    let current_index = api_products.findIndex(product => {
+      let current_index = api_products.findIndex(product => {
       return product._id == cart[j].id
     })
     number += cart[j].quantity;
