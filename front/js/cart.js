@@ -1,6 +1,21 @@
 let cart = JSON.parse(localStorage.getItem("product_client"));
 let api_products = [];
 
+// Apparition des produits dans l'ordre alphabétique
+function nameOrder() {
+  api_products.sort(function (a, b) {
+    const nameA = a.name.toUpperCase();
+    const nameB = b.name.toUpperCase();
+    if (nameA < nameB) {
+      return -1;
+    }
+    if (nameA > nameB) {
+      return 1;
+    }
+    return 0;
+  });
+}
+
 getAPIProducts(cart);
 //------------------------------------------------------------
 
@@ -19,24 +34,25 @@ async function getAPIProducts(products) {
       await fetch(`http://localhost:3000/api/products/` + products[i].id)
         .then((res) => res.json())
         .then((data) => (api_product = data));
-      if(!api_product){
+      if (!api_product) {
         continue;
       }
       api_product.color = products[i].color;
       api_product.quantity = products[i].quantity;
       api_products.push(api_product);
+      nameOrder();
     }
     displayProducts();
   } catch (err) {
     console.error(err);
-  } 
+  }
 }
 //------------------------------------------------------------
 
 // Création des produits et leurs infos
 function displayProducts() {
   let cart_items = document.querySelector("#cart__items");
-  cart_items.innerHTML = api_products 
+  cart_items.innerHTML = api_products
     .map((product) => {
       return `<article class="cart__item" data-id="${product._id}" data-color="${product.color}">
     <div class="cart__item__img">
@@ -69,6 +85,7 @@ function displayProducts() {
 //------------------------------------------------------------
 
 // Récuperer la value de quantité quand elle change
+let quantity_error = document.createElement("span");
 function changeInput() {
   let input_qty = document.querySelectorAll(".cart__item");
   input_qty.forEach((input_qty) => {
@@ -83,8 +100,14 @@ function changeInput() {
           if (e.target.value > 0 && e.target.value < 101) {
             cart[i].quantity = e.target.value;
             cart[i].quantity = parseInt(cart[i].quantity);
+            quantity_error.textContent = "";
             localStorage.setItem("product_client", JSON.stringify(cart));
           } else {
+            let wrong_quantity = e.target.closest("div");
+            wrong_quantity.appendChild(quantity_error);
+            quantity_error.textContent =
+              "Veuillez choisir une quantité de produit compris entre 1 et 100";
+            quantity_error.style.color = "red";
             return false;
           }
         }
@@ -108,7 +131,11 @@ function listenDeleteEvents() {
           data_id == api_products[j]._id &&
           data_color == api_products[j].color
         ) {
-          cart = cart.filter((prod) => prod._id !== api_products[j]._id && prod.color !== api_products[j].color);
+          cart = cart.filter(
+            (prod) =>
+              prod._id !== api_products[j]._id &&
+              prod.color !== api_products[j].color
+          );
           localStorage.setItem("product_client", JSON.stringify(cart));
           article.remove();
           if (cart === null || cart == 0) {
@@ -134,9 +161,9 @@ function totalQty() {
   let number = 0;
   let total = 0;
   for (let j = 0; j < cart.length; j++) {
-      let current_index = api_products.findIndex(product => {
-      return product._id == cart[j].id
-    })
+    let current_index = api_products.findIndex((product) => {
+      return product._id == cart[j].id;
+    });
     number += cart[j].quantity;
     total += cart[j].quantity * api_products[current_index].price;
   }
@@ -179,7 +206,6 @@ let contact = {
   city: "",
   email: "",
 };
-
 
 // Event au click
 btn_order.addEventListener("click", (e) => {
@@ -246,7 +272,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       address_error.innerHTML =
-        "merci de rentrer une adresse valide, max 50 caractères";
+        "merci de rentrer une adresse valide, max 50 caractères et débutant par des chiffres";
       return false;
     }
   }
@@ -285,7 +311,7 @@ btn_order.addEventListener("click", (e) => {
     !cityControle() ||
     !emailControle()
   ) {
-    return null
+    return null;
   }
   //-------------------------------------------------
 
@@ -309,10 +335,9 @@ btn_order.addEventListener("click", (e) => {
     try {
       const POST_ORDER = await response.json();
       let orderId = POST_ORDER.orderId;
-      
+
       // Clear le localStorage
       localStorage.clear();
-
       window.location.assign("confirmation.html?id=" + orderId);
     } catch (e) {
       console.log(e);
