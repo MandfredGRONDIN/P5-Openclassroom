@@ -70,14 +70,14 @@ add_cart.addEventListener("click", () => {
 // Vérifier si il y as bien une couleur et une quantite de choisi
 function verifyInput(product_client) {
   if (product_client.color == "") {
-    colorMiss()
-  } else if (product_client.quantity < 1 || product_client.quantity > 100){
+    colorMiss();
+  } else if (product_client.quantity < 1 || product_client.quantity > 100) {
     quantityMiss();
   } else {
-      if (addLs(product_client)){
-      productAdded()
+    if (addLs(product_client)) {
+      productAdded();
     } else {
-      excessQuantity()
+      excessQuantity();
     }
   }
 }
@@ -85,7 +85,7 @@ function verifyInput(product_client) {
 
 // Ajouter le produit au ls et ajoute uniquement la quantité si le produit y est déjà
 function addLs(product_client) {
-  let cart = JSON.parse(localStorage.getItem("product_client")); /* JSON.parse permet d'analyser ls.getItem comme du json */
+  let cart = JSON.parse(localStorage.getItem("product_client")); // JSON.parse permet d'analyser ls.getItem comme du json 
   if (cart == null) {
     cart = [];
     cart.push(product_client);

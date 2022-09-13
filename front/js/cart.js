@@ -95,12 +95,16 @@ function changeInput() {
       let data_color = article.getAttribute("data-color");
       for (let i = 0; i < cart.length; i++) {
         if (cart[i].id === data_id && cart[i].color === data_color) {
-          if (e.target.value <= 100) {
-            cart[i].quantity = parseInt(e.target.value);
-            localStorage.setItem("product_client", JSON.stringify(cart));
-          } else {
+          if (e.target.value > 100) {
             e.target.value = 100;
             cart[i].quantity = 100;
+            localStorage.setItem("product_client", JSON.stringify(cart));
+          } else if (e.target.value < 1) {
+            e.target.value = 1;
+            cart[i].quantity = 1;
+            localStorage.setItem("product_client", JSON.stringify(cart));
+          } else {
+            cart[i].quantity = parseInt(e.target.value);
             localStorage.setItem("product_client", JSON.stringify(cart));
           }
         }
@@ -222,7 +226,7 @@ btn_order.addEventListener("click", (e) => {
     return /^[A-Za-z]{3,20}$/.test(value);
   };
   const REG_EX_CITY = (value) => {
-    return /^[a-zA-Zéèàïêç\-\s]{2,30}$/.test(value);
+    return /^[A-Za-zéèàïêç\-\s]{2,50}\s+[0-9]{5}$/.test(value);
   };
   const REG_EX_ADDRESS = (value) => {
     return /^[0-9]{1,5}\s+[A-Za-zéèàïêç\-\s]{2,50}$/.test(value);
@@ -265,7 +269,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       address_error.innerHTML =
-        "merci de rentrer une adresse valide, max 50 caractères et débutant par des chiffres";
+        "merci de renseigner votre adresse de max 50 caractères et débutant par des chiffres";
       return false;
     }
   }
@@ -278,7 +282,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       city_error.innerHTML =
-        "Merci de rentrer le nom de votre ville ou village, pas de code postal";
+        `Merci de renseigner votre ville et votre code postal, exemple : "Paris 00000 "`;
       return false;
     }
   }
