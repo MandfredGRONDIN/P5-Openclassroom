@@ -95,20 +95,13 @@ function changeInput() {
       let data_color = article.getAttribute("data-color");
       for (let i = 0; i < cart.length; i++) {
         if (cart[i].id === data_id && cart[i].color === data_color) {
-          console.log(e.target.value);
-          console.log(cart[i].quantity);
-          if (e.target.value > 0 && e.target.value < 101) {
-            cart[i].quantity = e.target.value;
-            cart[i].quantity = parseInt(cart[i].quantity);
-            quantity_error.textContent = "";
+          if (e.target.value <= 100) {
+            cart[i].quantity = parseInt(e.target.value);
             localStorage.setItem("product_client", JSON.stringify(cart));
           } else {
-            let wrong_quantity = e.target.closest("div");
-            wrong_quantity.appendChild(quantity_error);
-            quantity_error.textContent =
-              "Veuillez choisir une quantité de produit compris entre 1 et 100";
-            quantity_error.style.color = "red";
-            return false;
+            e.target.value = 100;
+            cart[i].quantity = 100;
+            localStorage.setItem("product_client", JSON.stringify(cart));
           }
         }
       }
