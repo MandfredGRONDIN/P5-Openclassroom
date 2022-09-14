@@ -223,10 +223,10 @@ btn_order.addEventListener("click", (e) => {
 
   // Const regEx pour le formulaire
   const REG_EX_LAST_FIRST_NAME = (value) => {
-    return /^[A-Za-z]{3,20}$/.test(value);
+    return /^[A-Za-z]{2,38}$/.test(value);
   };
   const REG_EX_CITY = (value) => {
-    return /^[A-Za-zéèàïêç\-\s]{2,50}\s+[0-9]{5}$/.test(value);
+    return /^[A-Za-zéèàïêç\-\s]{1,50}\s+[0-9]{5}$/.test(value);
   };
   const REG_EX_ADDRESS = (value) => {
     return /^[0-9]{1,5}\s+[A-Za-zéèàïêç\-\s]{2,50}$/.test(value);
@@ -281,8 +281,7 @@ btn_order.addEventListener("click", (e) => {
       city_error.innerHTML = "";
       return true;
     } else {
-      city_error.innerHTML =
-        `Merci de renseigner votre ville et votre code postal, exemple : "Paris 00000 "`;
+      city_error.innerHTML = `Merci de renseigner votre ville et votre code postal, exemple : "Paris 00000 "`;
       return false;
     }
   }

@@ -37,7 +37,6 @@ function displayProductInfos(product) {
 //------------------------------------------------------------
 
 // Récuperer la valeur de couleur quand celle ci-change
-console.log(product_client.color)
 function listenColorsEvent() {
   product_colors.addEventListener("change", (event) => {
     product_client.color = event.target.value;
@@ -62,14 +61,15 @@ function listenQuantityEvent() {
 // Click sur le bouton ajouter au panier
 let add_cart = document.querySelector("#addToCart");
 add_cart.addEventListener("click", () => {
-  console.log(product_client);
   verifyInput(product_client);
 });
 //------------------------------------------------------------
 
 // Vérifier si il y as bien une couleur et une quantite de choisi
 function verifyInput(product_client) {
-  if (product_client.color == "") {
+  if((product_client.color == "") && (product_client.quantity < 1 || product_client.quantity > 100)){
+    colorQuantityMiss()
+  } else if (product_client.color == "") {
     colorMiss();
   } else if (product_client.quantity < 1 || product_client.quantity > 100) {
     quantityMiss();
@@ -125,6 +125,11 @@ function style(){
   newElt.style.fontWeight = "bold";
   newElt.style.textAlign = "center";
   newElt.style.paddingTop = "5px";
+}
+
+function colorQuantityMiss(){
+  document.querySelector(".color__miss , .quantity__miss").textContent = "Merci de bien choisir une couleur et une quantité";
+  styleError()
 }
 
 function colorMiss(){
