@@ -270,7 +270,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       first_name_error.innerHTML =
-        "Le prénom doit avoir 3 lettres minimum et pas de caractère spéciaux ou chiffres";
+        "Le prénom doit avoir 3 lettres minimum et pas de caractères spéciaux ou chiffres";
       return false;
     }
   }
@@ -283,7 +283,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       last_name_error.innerHTML =
-        "Le nom doit avoir 3 lettres minimum et pas de caractère spéciaux ou chiffres";
+        "Le nom doit avoir 3 lettres minimum et pas de caractères spéciaux ou chiffres";
       return false;
     }
   }
@@ -296,7 +296,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       address_error.innerHTML =
-        "merci de renseigner votre adresse de max 50 caractères et débutant par des chiffres";
+        "Merci de renseigner votre adresse d'au maximum 50 caractères et débutant par des chiffres";
       return false;
     }
   }
@@ -308,7 +308,7 @@ btn_order.addEventListener("click", (e) => {
       city_error.innerHTML = "";
       return true;
     } else {
-      city_error.innerHTML = `Merci de renseigner votre ville et votre code postal, exemple : "Paris 00000 "`;
+      city_error.innerHTML = `Merci de renseigner votre ville et votre code postal. Exemple : « Paris 00000 »`;
       return false;
     }
   }
@@ -321,7 +321,7 @@ btn_order.addEventListener("click", (e) => {
       return true;
     } else {
       e_mail_error.innerHTML =
-        "Email non valide, il doit contenir un @ et 1 point suivi de maxixum 3 lettres";
+        "E-mail non valide. Il doit contenir un @ et un point suivi d'au maximum 3 lettres";
       return false;
     }
   }
