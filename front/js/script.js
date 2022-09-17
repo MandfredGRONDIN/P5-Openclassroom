@@ -1,7 +1,8 @@
 let items_container = document.querySelector(".items");
 
+// Récupérer les données de l'api
 fetch(`http://localhost:3000/api/products`)
-  .then((products) => products.json()) // Transforme l'api en fichier json
+  .then((products) => products.json())
   .then((products) => {
     displayProducts(products);
   });

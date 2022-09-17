@@ -1,7 +1,11 @@
 let cart = JSON.parse(localStorage.getItem("product_client"));
 let api_products = [];
 
-// Apparition des produits dans l'ordre alphabétique
+/**
+ * Tri de l'affichage des produits par ordre alphabétique
+ * nameA "< >" nameB réorganise les produits dans l'ordre alphabétique
+ * return 0, si égalité reste à sa position
+ */
 function nameOrder() {
   api_products.sort(function (a, b) {
     const nameA = a.name.toUpperCase();
@@ -19,7 +23,13 @@ function nameOrder() {
 getAPIProducts(cart);
 //------------------------------------------------------------
 
-// Récupérer les infos manquantes des produits
+/**
+ * Si pas d'article présent dans le ls, renvoie d'un message
+ * Si il y as un produit présent, pour chacun de ces produits rajout des informations manquantes
+ * !api_product si il y as un produit non présent dans l'api, continue en l'ignorant
+ * Tri des articles par ordre alphabétique
+ * Execution de la fonction displayProducts
+ */
 async function getAPIProducts(products) {
   if (products === null || products == 0) {
     document.querySelector("#totalQuantity").innerHTML = "0";
@@ -49,7 +59,11 @@ async function getAPIProducts(products) {
 }
 //------------------------------------------------------------
 
-// Création des produits et leurs infos
+/**
+ * Sélectionne chaque produits du tableau api_products
+ * Return la création du code html avec les infos du produit
+ * Puis un .join utilise "" comme séparateur
+ */
 function displayProducts() {
   let cart_items = document.querySelector("#cart__items");
   cart_items.innerHTML = api_products
@@ -84,7 +98,11 @@ function displayProducts() {
 
 //------------------------------------------------------------
 
-// Récuperer la value de quantité quand elle change
+/**
+ * Récupération des changements de quantité pour les ajouter dans le ls
+ * Si la valeur dépasse les 100, elle est alors réduite a 100
+ * Si la valeur est en dessous de 1, elle est alors initié a 1
+ */
 let quantity_error = document.createElement("span");
 function changeInput() {
   let input_qty = document.querySelectorAll(".cart__item");
@@ -115,7 +133,11 @@ function changeInput() {
 }
 //------------------------------------------------------------
 
-// Supprimer le produit
+/**
+ * Sélection de l'article à supprimer
+ * .filter permet d'identifier quel produit supprimer
+ * Si le ls est vide affiche un message
+ */
 function listenDeleteEvents() {
   let btn_delete = document.querySelectorAll(".cart__item .deleteItem");
   for (let i = 0; i < btn_delete.length; i++) {
@@ -151,7 +173,12 @@ function listenDeleteEvents() {
 }
 //------------------------------------------------------------
 
-// Total Quantité
+/**
+ * Ajout de la quantité de chaque produit et le prix totaux
+ * Number est égale à la quantité de chaque produit pour la quantité total
+ * Total correspond au prix totaux du panier
+ * Récupération du prix actuelle du produit depuis l'api-products grâce à findIndex
+ */
 function totalQty() {
   let total_quantity = document.querySelector("#totalQuantity");
   let total_price = document.querySelector("#totalPrice");
@@ -195,7 +222,7 @@ city_error.style.color = "red";
 let e_mail_error = document.querySelector("#emailErrorMsg");
 e_mail_error.style.color = "red";
 
-// Champs demanadés pour le POST
+// Champs demandés pour le POST
 let contact = {
   firstName: "",
   lastName: "",
@@ -218,7 +245,7 @@ btn_order.addEventListener("click", (e) => {
       this.email = e_mail.value;
     }
   }
-  // Appel de l'instance de classe Formulaire pour créer l'objet formulaire_value
+  // Appel de l'instance de classe Formulaire pour créer l'objet FORM_VALUE
   const FORM_VALUE = new Form();
 
   // Const regEx pour le formulaire
@@ -235,8 +262,8 @@ btn_order.addEventListener("click", (e) => {
     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value);
   };
 
-  // Controle de la validité name
-  function firstNameControle() {
+  // Control de la validité name
+  function firstNameControl() {
     let name_form = FORM_VALUE.firstName;
     if (REG_EX_LAST_FIRST_NAME(name_form)) {
       first_name_error.innerHTML = "";
@@ -248,8 +275,8 @@ btn_order.addEventListener("click", (e) => {
     }
   }
 
-  // Controle de la validité lastName
-  function lastNameControle() {
+  // Control de la validité lastName
+  function lastNameControl() {
     let last_name_form = FORM_VALUE.lastName;
     if (REG_EX_LAST_FIRST_NAME(last_name_form)) {
       last_name_error.innerHTML = "";
@@ -261,8 +288,8 @@ btn_order.addEventListener("click", (e) => {
     }
   }
 
-  // Controle de la validité address
-  function adressControle() {
+  // Control de la validité address
+  function addressControl() {
     let address_form = FORM_VALUE.address;
     if (REG_EX_ADDRESS(address_form)) {
       address_error.innerHTML = "";
@@ -274,8 +301,8 @@ btn_order.addEventListener("click", (e) => {
     }
   }
 
-  // Controle de la validité city
-  function cityControle() {
+  // Control de la validité city
+  function cityControl() {
     let city_form = FORM_VALUE.city;
     if (REG_EX_CITY(city_form)) {
       city_error.innerHTML = "";
@@ -286,8 +313,8 @@ btn_order.addEventListener("click", (e) => {
     }
   }
 
-  // Controle de la validité email
-  function emailControle() {
+  // Control de la validité email
+  function emailControl() {
     let email_form = FORM_VALUE.email;
     if (REG_EX_E_MAIL(email_form)) {
       e_mail_error.innerHTML = "";
@@ -300,15 +327,19 @@ btn_order.addEventListener("click", (e) => {
   }
 
   // Vérification si la fonction return vrai ou faux
+  let firstname_valid = firstNameControl(),
+    lastname_valid = lastNameControl(),
+    adress_valid = addressControl(),
+    city_valid = cityControl(),
+    email_valid = emailControl();
   if (
-    !firstNameControle() ||
-    !lastNameControle() ||
-    !adressControle() ||
-    !cityControle() ||
-    !emailControle()
-  ) {
+    !firstname_valid ||
+    !lastname_valid ||
+    !adress_valid ||
+    !city_valid ||
+    !email_valid
+  )
     return null;
-  }
   //-------------------------------------------------
 
   // Push uniquement les Id dans le tableau des produits

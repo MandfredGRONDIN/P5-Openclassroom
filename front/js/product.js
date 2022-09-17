@@ -1,20 +1,23 @@
 // Récuperer l'id du produit
 let product_id = new URLSearchParams(window.location.search).get("_id");
 
+// Récupérer la donnée du produit grâce à son id
 fetch(`http://localhost:3000/api/products/` + product_id)
-  .then((product) => product.json()) // Transforme l'api en fichier json
+  .then((product) => product.json()) 
   .then((product) => {
     displayProductInfos(product);
     listenColorsEvent();
     listenQuantityEvent();
   });
 
+// Initialisation de l'object product_client
 let product_client = { 
   id : product_id,
   color : "",
   quantity : 0
 };
 
+// Déclaration des selectors
 let product_img = document.querySelector(".item__img");
 let product_title = document.querySelector("#title");
 let product_price = document.querySelector("#price");
@@ -24,7 +27,7 @@ let product_nb = document.querySelector("#quantity");
 let color_miss = document.querySelector(".item__content");
 
 
-// Afficher les informations du produit
+// Afficher les informations du produit avec une boucle for pour les couleurs
 function displayProductInfos(product) {
   product_img.innerHTML += `<img src="${product.imageUrl}" alt="${product.altTxt}">`;
   product_title.innerHTML += `<h1 id="title"> ${product.name} </h1>`;
@@ -84,6 +87,12 @@ function verifyInput(product_client) {
 //------------------------------------------------------------
 
 // Ajouter le produit au ls et ajoute uniquement la quantité si le produit y est déjà
+/**
+ * Ajout de la quantité si le produit est déjà présent dans le localStorage
+ * get_article récupère le localStorage et vérifie si le produit choisi est déjà présent dans le ls
+ * Si il est déjà présent ajout de de get_article.quantity à product_client.quantity
+ * Si le produit n'est pas présent dans le localStorage il l'ajoute directement dans le ls
+ */
 function addLs(product_client) {
   let cart = JSON.parse(localStorage.getItem("product_client")); // JSON.parse permet d'analyser ls.getItem comme du json 
   if (cart == null) {
